@@ -10,8 +10,14 @@
 #define ProgressAbstract_h
 
 #import "NumberAbstract.h"
+#import "GGSizeRange.h"
 
 @protocol ProgressAbstract <NSObject>
+
+/**
+ * 是否为线性
+ */
+@property (nonatomic, assign) BOOL linear;
 
 /**
  * 最大值

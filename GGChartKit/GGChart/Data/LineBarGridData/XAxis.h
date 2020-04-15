@@ -6,7 +6,8 @@
 //  Copyright © 2017年 I really is a farmer. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import "GGLine.h"
 
 @interface XAxis : NSObject
 
@@ -59,7 +60,7 @@
 /**
  * 是否显示轴网格线
  */
-@property (nonatomic, assign) BOOL showSplitLine;
+@property (nonatomic, assign) BOOL showSplitLine; 
 
 /**
  * 是否显示查价标

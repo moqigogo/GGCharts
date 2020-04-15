@@ -7,6 +7,8 @@
 //
 
 #import "LineBarGird.h"
+#import "GridAbstract.h"
+#import "GGGraphicsConstants.h"
 
 @interface LineBarGird () <GridAbstract>
 
@@ -30,6 +32,7 @@
         _axisLineColor = [UIColor blackColor];
         _axisLableFont = [UIFont systemFontOfSize:10];
         _axisLableColor = [UIColor blackColor];
+        _showInnerLine = YES;
     }
     
     return self;

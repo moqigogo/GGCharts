@@ -7,6 +7,7 @@
 //
 
 #import "GGLine.h"
+#import "GGCanvas.h" 
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -121,27 +122,34 @@ NSArray * GGPathLinesStretchAnimation(CGPoint * points, size_t size, CGFloat y)
  *
  * @return 路径动画数组
  */
-NSArray * GGPathLinesUpspringAnimation(CGPoint * points, size_t size, CGFloat y)
+NSArray * GGPathLinesUpspringAnimation(CGPoint * points, size_t size, CGFloat y, BOOL isCurve)
 {
     NSMutableArray * ary = [NSMutableArray array];
     
     CGPoint basePoints[size];
     
     for (NSInteger i = 0; i < size; i++) {
-        
         basePoints[i] = CGPointMake(points[i].x, y);
     }
     
-    CGMutablePathRef ref = CGPathCreateMutable();
-    CGPathAddLines(ref, NULL, basePoints, size);
-    [ary addObject:(__bridge id)ref];
-    CGPathRelease(ref);
-    
-    ref = CGPathCreateMutable();
-    CGPathAddLines(ref, NULL, points, size);
-    [ary addObject:(__bridge id)ref];
-    CGPathRelease(ref);
-    
+    if (isCurve) {
+        UIBezierPath *path1 = [GGCanvas drawCurveLine:basePoints withSize:size];
+        [ary addObject:(__bridge id)path1.CGPath];
+
+        UIBezierPath *path2 = [GGCanvas drawCurveLine:points withSize:size];
+        [ary addObject:(__bridge id)path2.CGPath];
+    }else{
+        CGMutablePathRef ref = CGPathCreateMutable();
+        CGPathAddLines(ref, NULL, basePoints, size);
+        [ary addObject:(__bridge id)ref];
+        CGPathRelease(ref);
+        
+        ref = CGPathCreateMutable();
+        CGPathAddLines(ref, NULL, points, size);
+        [ary addObject:(__bridge id)ref];
+        CGPathRelease(ref); 
+    }
+
     return ary;
 }
 
@@ -199,7 +207,7 @@ NSArray * GGPathFillLinesStretchAnimation(CGPoint * points, size_t size, CGFloat
  *
  * @return 路径动画数组
  */
-NSArray * GGPathFillLinesUpspringAnimation(CGPoint * points, size_t size, CGFloat y)
+NSArray * GGPathFillLinesUpspringAnimation(CGPoint * points, size_t size, CGFloat y, BOOL isCurve)
 {
     NSMutableArray * ary = [NSMutableArray array];
     
@@ -210,19 +218,36 @@ NSArray * GGPathFillLinesUpspringAnimation(CGPoint * points, size_t size, CGFloa
         basePoints[i] = CGPointMake(points[i].x, y);
     }
     
-    CGMutablePathRef ref = CGPathCreateMutable();
-    CGPathAddLines(ref, NULL, basePoints, size);
-    CGPathAddLineToPoint(ref, NULL, basePoints[size - 1].x, y);
-    CGPathAddLineToPoint(ref, NULL, basePoints[0].x, y);
-    [ary addObject:(__bridge id)ref];
-    CGPathRelease(ref);
-    
-    ref = CGPathCreateMutable();
-    CGPathAddLines(ref, NULL, points, size);
-    CGPathAddLineToPoint(ref, NULL, points[size - 1].x, y);
-    CGPathAddLineToPoint(ref, NULL, points[0].x, y);
-    [ary addObject:(__bridge id)ref];
-    CGPathRelease(ref);
+    if (isCurve) {
+        CGPoint lineFirstPoint = basePoints[0];
+        CGPoint lineLastPoint = basePoints[size - 1];
+        
+        UIBezierPath *path = [GGCanvas drawCurveLine:basePoints withSize:size];
+        [path addLineToPoint:CGPointMake(lineLastPoint.x, y)];
+        [path addLineToPoint:CGPointMake(lineFirstPoint.x, y)];
+        [path closePath];
+        [ary addObject:(__bridge id)path.CGPath];
+        
+        path = [GGCanvas drawCurveLine:points withSize:size];
+        [path addLineToPoint:CGPointMake(lineLastPoint.x, y)];
+        [path addLineToPoint:CGPointMake(lineFirstPoint.x, y)];
+        [path closePath];
+        [ary addObject:(__bridge id)path.CGPath];
+    }else{
+        CGMutablePathRef ref = CGPathCreateMutable();
+        CGPathAddLines(ref, NULL, basePoints, size);
+        CGPathAddLineToPoint(ref, NULL, basePoints[size - 1].x, y);
+        CGPathAddLineToPoint(ref, NULL, basePoints[0].x, y);
+        [ary addObject:(__bridge id)ref];
+        CGPathRelease(ref);
+        
+        ref = CGPathCreateMutable();
+        CGPathAddLines(ref, NULL, points, size);
+        CGPathAddLineToPoint(ref, NULL, points[size - 1].x, y);
+        CGPathAddLineToPoint(ref, NULL, points[0].x, y);
+        [ary addObject:(__bridge id)ref];
+        CGPathRelease(ref);
+    }
     
     return ary;
 }

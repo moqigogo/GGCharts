@@ -7,6 +7,9 @@
 //
 
 #import "GridBackCanvas.h"
+#import "GGAxisRenderer.h"
+#import "GGStringRenderer.h"
+#import "GGLineRenderer.h"
 
 @interface GridBackCanvas ()
 
@@ -157,6 +160,9 @@
         CGFloat splitLength = lineLength / [numberAxis splitCount];
         
         for (NSInteger i = 0; i <= [numberAxis splitCount]; i++) {
+            if (i>0 && i < [numberAxis splitCount] && !_gridDrawConfig.showInnerLine) {
+                continue;
+            }
             
             GGLineRenderer * lineRenderer = [[GGLineRenderer alloc] init];
             lineRenderer.line = GGLineRectForY(gridRect, line.start.y + splitLength * i);
@@ -207,6 +213,9 @@
             CGFloat splitLength = length / splitCount;
             
             for (NSInteger i = 0; i <= splitCount; i++) {
+                if (i>0 && i < splitCount && !_gridDrawConfig.showInnerLine) {
+                    continue;
+                }
                 
                 GGLineRenderer * lineRenderer = [[GGLineRenderer alloc] init];
                 lineRenderer.line = GGLineRectForX(gridRect, [lableAxis axisLine].start.x + splitLength * i);

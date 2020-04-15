@@ -8,6 +8,7 @@
 
 #ifndef BaseAxisAbstract_h
 #define BaseAxisAbstract_h
+#import "GGLine.h"
 
 @protocol BaseAxisAbstract <NSObject>
 
@@ -40,8 +41,7 @@
 /**
  * 是否显示轴网格线
  */
-@property (nonatomic, assign, readonly) BOOL showSplitLine;
-
+@property (nonatomic, assign, readonly) BOOL showSplitLine; 
 /**
  * 是否显示查价标
  */

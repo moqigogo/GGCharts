@@ -9,6 +9,13 @@
 #import "LineAnimationsManager.h"
 #import <objc/runtime.h>
 #import "NSObject+FireBlock.h"
+#import "Animator.h"
+#import "GGGraphicsConstants.h"
+#import "UIView+GGFrame.h"
+#import "LineDrawAbstract.h"
+#import "BarDrawAbstract.h"
+#import "GGNumberRenderer.h"
+#import "GGShapeCanvas.h"
 
 @interface LineAnimationsManager ()
 
@@ -142,11 +149,10 @@
         NSInteger size = [lineAbstract dataAry].count;
         CGFloat bottomPix = [lineAbstract bottomYPix];
         NSArray * numberRenderers = GET_ASSOCIATED(lineAbstract, lineNumberArray);
+        BOOL isCurve = [lineAbstract isCurve];
         
         if (numberRenderers) {
-            
             for (NSInteger i = 0; i < [lineAbstract dataAry].count; i++) {
-                
                 GGNumberRenderer * renderer = numberRenderers[i];
                 renderer.fromPoint = CGPointMake(renderer.toPoint.x, bottomPix);
                 renderer.fromNumber = 0;
@@ -157,27 +163,24 @@
         GGShapeCanvas * anifillLayer = GET_ASSOCIATED(lineAbstract, lineFillLayer);
         
         if (anifillLayer) {
-            
             CAKeyframeAnimation * fillAnimation = [CAKeyframeAnimation animationWithKeyPath:@"path"];
             fillAnimation.duration = duration;
-            fillAnimation.values = GGPathFillLinesUpspringAnimation(linePoints, size, bottomPix);
+            fillAnimation.values = GGPathFillLinesUpspringAnimation(linePoints, size, bottomPix, isCurve);
             [anifillLayer addAnimation:fillAnimation forKey:@"fillAnimation"];
         }
         
         GGShapeCanvas * aniLineLayer = GET_ASSOCIATED(lineAbstract, lineLayer);
         
         if (aniLineLayer) {
-            
             CAKeyframeAnimation * lineAnimation = [CAKeyframeAnimation animationWithKeyPath:@"path"];
             lineAnimation.duration = duration;
-            lineAnimation.values = GGPathLinesUpspringAnimation(linePoints, size, bottomPix);
+            lineAnimation.values = GGPathLinesUpspringAnimation(linePoints, size, bottomPix, isCurve);
             [aniLineLayer addAnimation:lineAnimation forKey:@"lineAnimation"];
         }
         
         GGShapeCanvas * aniShapeLayer = GET_ASSOCIATED(lineAbstract, lineShapeLayer);
         
         if (aniShapeLayer) {
-            
             CAKeyframeAnimation * pointAnimation = [CAKeyframeAnimation animationWithKeyPath:@"path"];
             pointAnimation.duration = duration;
             pointAnimation.values = GGPathCirclesUpspringAnimation(linePoints, [lineAbstract shapeRadius], size, bottomPix, [lineAbstract showShapeIndexSet]);
@@ -186,9 +189,7 @@
     }
     
     [self.animator startAnimationWithDuration:duration animationArray:aryAllNumberRenderers updateBlock:^(CGFloat progress) {
-        
         for (id <LineDrawAbstract> lineDrawAbstract in self.lineAbstractAry) {
-            
             [GET_ASSOCIATED(lineDrawAbstract, lineStringLayer) setNeedsDisplay];
         }
     }];

@@ -10,6 +10,7 @@
 #import "DLineScaler.h"
 #include <objc/runtime.h>
 #import "LineAnimationsManager.h"
+#import "GGCanvas.h"
 
 @interface LineCanvas ()
 
@@ -88,10 +89,15 @@
     shape.fillColor = [UIColor clearColor].CGColor;
     shape.lineDashPattern = [lineAbstract dashPattern];
     
-    CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddLines(path, NULL, [lineAbstract points], [lineAbstract dataAry].count);
-    shape.path = path;
-    CGPathRelease(path);
+    if ([lineAbstract isCurve]) {
+        UIBezierPath *path= [GGCanvas drawCurveLine:[lineAbstract points] withSize:[lineAbstract dataAry].count];
+        shape.path = path.CGPath;
+    }else{
+        CGMutablePathRef path = CGPathCreateMutable();
+        CGPathAddLines(path, NULL, [lineAbstract points], [lineAbstract dataAry].count);
+        shape.path = path;
+        CGPathRelease(path);
+    }
     
     SET_ASSOCIATED_ASSIGN(lineAbstract, lineLayer, shape);
 }
@@ -177,13 +183,21 @@
         CGPoint lineFirstPoint = [lineAbstract points][0];
         CGPoint lineLastPoint = [lineAbstract points][lineAbstract.dataAry.count - 1];
         
-        CGMutablePathRef path = CGPathCreateMutable();
-        CGPathAddLines(path, NULL, [lineAbstract points], lineAbstract.dataAry.count);
-        CGPathAddLineToPoint(path, NULL, lineLastPoint.x, [lineAbstract bottomYPix]);
-        CGPathAddLineToPoint(path, NULL, lineFirstPoint.x, [lineAbstract bottomYPix]);
-        CGPathCloseSubpath(path);
-        shape.path = path;
-        CGPathRelease(path);
+        if ([lineAbstract isCurve]) {
+            UIBezierPath *path = [GGCanvas drawCurveLine:[lineAbstract points] withSize:[lineAbstract dataAry].count];
+            [path addLineToPoint:CGPointMake(lineLastPoint.x, [lineAbstract bottomYPix])];
+            [path addLineToPoint:CGPointMake(lineFirstPoint.x, [lineAbstract bottomYPix])];
+            [path closePath];
+            shape.path = path.CGPath;
+        }else{
+            CGMutablePathRef path = CGPathCreateMutable();
+            CGPathAddLines(path, NULL, [lineAbstract points], lineAbstract.dataAry.count);
+            CGPathAddLineToPoint(path, NULL, lineLastPoint.x, [lineAbstract bottomYPix]);
+            CGPathAddLineToPoint(path, NULL, lineFirstPoint.x, [lineAbstract bottomYPix]);
+            CGPathCloseSubpath(path);
+            shape.path = path;
+            CGPathRelease(path);
+        }
         
         SET_ASSOCIATED_ASSIGN(lineAbstract, lineFillLayer, shape);
         
@@ -212,6 +226,5 @@
 
 #pragma mark - Lazy
 
-GGLazyGetMethod(LineAnimationsManager, lineAnimations);
-
+GGLazyGetMethod(LineAnimationsManager, lineAnimations); 
 @end
